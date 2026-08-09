@@ -16,6 +16,15 @@ namespace E_commerce_project
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()   // يسمح لأي موقع بالاتصال بالـ API
+                           .AllowAnyMethod()   // يسمح بـ GET, POST, PUT, DELETE
+                           .AllowAnyHeader();  // يسمح بأي Headers
+                });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -34,6 +43,7 @@ namespace E_commerce_project
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseCors("AllowAll"); // 👈 ضيف السطر ده هنا
 
             app.UseAuthorization();
 
