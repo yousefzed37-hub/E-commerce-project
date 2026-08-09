@@ -1,4 +1,5 @@
 ﻿using E_commerce_project.DataContext;
+using E_commerce_project.DTOs;
 using E_commerce_project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,15 +32,31 @@ namespace E_commerce_project.Controllers
              return Ok(product);
         }
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Product product)
+        public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
         {
-            var CategoryExists = await _context.Categories.AnyAsync(c => c.categoryId == product.categoryId);
-            if(!CategoryExists)
+            // 1. التأكد إن الـ CategoryId موجود فعلاً في الداتابيز
+            var categoryExists = await _context.Categories.AnyAsync(c => c.categoryId == dto.categoryId);
+            if (!categoryExists)
             {
-                return BadRequest();
+                return BadRequest(new { message = $"Category with ID {dto.categoryId} does not exist." });
             }
+
+            // 2. تحويل الـ DTO لـ Product Model
+            var product = new Product
+            {
+                productName = dto.productName,
+                productDescription = dto.productDescription,
+                price = dto.price,
+                stockQuantity = dto.stockQuantity,
+                imageUrl = dto.imageUrl,
+                categoryId = dto.categoryId,
+                createdDate = DateTime.UtcNow
+            };
+
+            // 3. الحفظ في الداتابيز
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(FindById), new { id = product.productId }, product);
         }
         [HttpPut("{id}")]
