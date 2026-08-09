@@ -60,27 +60,34 @@ namespace E_commerce_project.Controllers
             return CreatedAtAction(nameof(FindById), new { id = product.productId }, product);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id , [FromBody] Product UpdatedProduct)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto dto)
         {
-            if (id != UpdatedProduct.productId)
+            // 1. البحث عن المنتج في الداتابيز
+            var existingProduct = await _context.Products.FindAsync(id);
+            if (existingProduct == null)
             {
-                return BadRequest();
+                return NotFound(new { message = $"Product with ID {id} not found." });
             }
-            var existing = await _context.Products.FindAsync(id);
-            if (existing == null)
-            {
-                return NotFound();
-            }
-            existing.productName = UpdatedProduct.productName;
-            existing.productDescription = UpdatedProduct.productDescription;
-            existing.price = UpdatedProduct.price;
-            existing.stockQuantity = UpdatedProduct.stockQuantity;
-            existing.imageUrl = UpdatedProduct.imageUrl;
-            existing.categoryId = UpdatedProduct.categoryId;
 
+            // 2. التأكد إن الـ Category الجديدة موجودة فعلاً
+            var categoryExists = await _context.Categories.AnyAsync(c => c.categoryId == dto.categoryId);
+            if (!categoryExists)
+            {
+                return BadRequest(new { message = $"Category with ID {dto.categoryId} does not exist." });
+            }
+
+            // 3. تحديث البيانات
+            existingProduct.productName = dto.productName;
+            existingProduct.productDescription = dto.productDescription;
+            existingProduct.price = dto.price;
+            existingProduct.stockQuantity = dto.stockQuantity;
+            existingProduct.imageUrl = dto.imageUrl;
+            existingProduct.categoryId = dto.categoryId;
+
+            // 4. حفظ التعديلات
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return NoContent(); // أو return Ok(existingProduct);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

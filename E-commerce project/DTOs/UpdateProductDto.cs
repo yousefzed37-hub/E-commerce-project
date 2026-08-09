@@ -1,0 +1,12 @@
+﻿namespace E_commerce_project.DTOs
+{
+    public class UpdateProductDto
+    {
+        public string productName { get; set; } = string.Empty;
+        public string productDescription { get; set; } = string.Empty;
+        public decimal price { get; set; }
+        public int stockQuantity { get; set; }
+        public string imageUrl { get; set; } = string.Empty;
+        public int categoryId { get; set; }
+    }
+}
