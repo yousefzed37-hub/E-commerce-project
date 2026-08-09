@@ -16,10 +16,41 @@ namespace E_commerce_project.Controllers
             _context = context;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] ProductFilterDto filter)
         {
-            var products = await _context.Products.Include(p => p.category).ToListAsync();  
-            return Ok(products);
+            //By Search
+            var query = _context.Products.Include(p => p.category).AsQueryable();
+            if(!string.IsNullOrWhiteSpace(filter.searchTerm))
+            {
+                var searchTerm = filter.searchTerm.Trim().ToLower();
+                query = query.Where(p => p.productName.ToLower().Contains(searchTerm) || p.productDescription.ToLower().Contains(searchTerm));
+            }
+
+            //By Category
+            if(filter.categoryId.HasValue && filter.categoryId > 0)
+            {
+                query = query.Where(p => p.categoryId == filter.categoryId.Value);
+            }
+
+            //By Price Range
+            if(filter.minPrice.HasValue)
+            {
+                query = query.Where(p => p.price >= filter.minPrice.Value);
+            }
+            if(filter.maxPrice.HasValue)
+            {
+                query = query.Where(p => p.price <= filter.maxPrice.Value);
+            }
+            query = filter.sortBy switch
+            {
+                "priceAsc" => query.OrderBy(p => p.price),
+                "priceDesc" => query.OrderByDescending(p => p.price),
+                "nameAsc" => query.OrderBy(p => p.productName),
+                "nameDesc" => query.OrderByDescending(p => p.productName),
+                _ => query.OrderBy(p => p.productId)
+            };
+            var products = await query.ToListAsync();
+            return Ok(products);    
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> FindById(int id)
