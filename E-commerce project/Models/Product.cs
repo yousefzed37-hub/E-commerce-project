@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace E_commerce_project.Models
 {
@@ -18,6 +19,7 @@ namespace E_commerce_project.Models
         public DateTime createdDate { get; set; } = DateTime.Now;
         [ForeignKey("Category")]
         public int categoryId { get; set; }
+        [JsonIgnore]
         public Category category { get; set; } = null!;
     }
 }
