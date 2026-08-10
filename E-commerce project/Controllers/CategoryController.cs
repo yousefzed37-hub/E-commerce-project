@@ -53,6 +53,7 @@ namespace E_commerce_project.Controllers
                 return NotFound();
             }
             existingCategory.categoryName = dto.categoryName;
+            existingCategory.categoryDescription = dto.categoryDescription;
             await _context.SaveChangesAsync();
             return NoContent();
         }

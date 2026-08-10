@@ -19,7 +19,22 @@ namespace E_commerce_project.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var orders = await _context.Orders.Include(o => o.orderItems).ThenInclude(oi => oi.Product).ToListAsync();
+            var orders = await _context.Orders.Include(o => o.orderItems).ThenInclude(oi => oi.Product).Select(o => new OrderResponseDto
+            {
+                orderId = o.orderId,
+                userName = o.userName,
+                orderDate = o.orderDate,
+                totalAmount = o.totalAmount,
+                orderStatus = o.orderStatus.ToString(),
+                orderItems = o.orderItems.Select(oi => new OrderItemResponseDto
+                {
+                    id = oi.Id,
+                    productId = oi.ProductId,
+                    productName = oi.Product.productName,
+                    quantity = oi.Quantity,
+                    unitPrice = oi.UnitPrice
+                }).ToList()
+            }).ToListAsync();
             return Ok(orders);
         }
         [HttpGet("{id}")]
@@ -96,6 +111,17 @@ namespace E_commerce_project.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }
