@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using E_commerce_project.Models;
 using Microsoft.EntityFrameworkCore;
+using E_commerce_project.DTOs;
 
 namespace E_commerce_project.Controllers
 {
@@ -44,19 +45,14 @@ namespace E_commerce_project.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id , Category category)
+        public async Task<IActionResult> Update(int id , CategoryDto dto)
         {
-            if(id != category.categoryId)
-            {
-                return BadRequest();
-            }
             var existingCategory = await _context.Categories.FindAsync(id);
             if(existingCategory == null)
             {
                 return NotFound();
             }
-            existingCategory.categoryName = category.categoryName;
-            existingCategory.categoryDescription = category.categoryDescription;
+            existingCategory.categoryName = dto.categoryName;
             await _context.SaveChangesAsync();
             return NoContent();
         }

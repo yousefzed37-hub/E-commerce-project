@@ -69,13 +69,20 @@ namespace E_commerce_project.Controllers
                     Quantity = itemDto.quantity,
                     UnitPrice = product.price
                 };
-                totalAmount += orderItem.Quantity * orderItem.UnitPrice;
+                totalAmount += orderItem.UnitPrice * itemDto.quantity; // 👈 حساب السعر الإجمالي
                 order.orderItems.Add(orderItem);
             }
             order.totalAmount = totalAmount; // 👈 إضافة السعر الإجمالي المحسوب للطلب
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = order.orderId }, order);
+
+            // 👈 بتضيف السطرين دول هنا
+            var createdOrder = await _context.Orders
+                .Include(o => o.orderItems)
+                .FirstOrDefaultAsync(o => o.orderId == order.orderId);
+
+            // 👈 وبتخلي الـ return ترجع createdOrder بدل order
+            return CreatedAtAction(nameof(GetById), new { id = order.orderId }, createdOrder);
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] OrderStatus updatedOrder)

@@ -19,7 +19,6 @@ namespace E_commerce_project.Models
         public DateTime createdDate { get; set; } = DateTime.Now;
         [ForeignKey("Category")]
         public int categoryId { get; set; }
-        [JsonIgnore]
         public Category category { get; set; } = null!;
     }
 }
