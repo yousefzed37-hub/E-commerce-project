@@ -1,6 +1,7 @@
-﻿using E_commerce_project.DataContext;
+﻿using E_commerce_project.DataContextContext;
 using E_commerce_project.DTOs;
 using E_commerce_project.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
