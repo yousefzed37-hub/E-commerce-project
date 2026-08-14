@@ -64,7 +64,7 @@ namespace E_commerce_project.Controllers
              return Ok(product);
         }
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
+        public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
             // 1. التأكد إن الـ CategoryId موجود فعلاً في الداتابيز
             var categoryExists = await _context.Categories.AnyAsync(c => c.categoryId == dto.categoryId);
@@ -73,6 +73,26 @@ namespace E_commerce_project.Controllers
                 return BadRequest(new { message = $"Category with ID {dto.categoryId} does not exist." });
             }
 
+
+
+            string imagePath = null;
+            if (dto.image != null && dto.image.Length > 0)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "product");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.image.FileName);
+                var filePath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream (filePath , FileMode.Create))
+                {
+                     await dto.image.CopyToAsync(stream);
+                }
+                imagePath = $"/images/products/{fileName}";
+            }   
+
             // 2. تحويل الـ DTO لـ Product Model
             var product = new Product
             {
@@ -80,7 +100,7 @@ namespace E_commerce_project.Controllers
                 productDescription = dto.productDescription,
                 price = dto.price,
                 stockQuantity = dto.stockQuantity,
-                imageUrl = dto.imageUrl,
+                imageUrl = imagePath,
                 categoryId = dto.categoryId,
                 createdDate = DateTime.UtcNow
             };

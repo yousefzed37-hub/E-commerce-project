@@ -52,12 +52,12 @@ namespace E_commerce_project.Controllers
             var existingCategory = await _context.Categories.FindAsync(id);
             if(existingCategory == null)
             {
-                return NotFound();
+                return NotFound("the category was not found");
             }
             existingCategory.categoryName = dto.categoryName;
             existingCategory.categoryDescription = dto.categoryDescription;
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok("Category updated successfully");
         }
 
         [HttpDelete("{id}")]
@@ -70,7 +70,7 @@ namespace E_commerce_project.Controllers
             }
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
-            return Ok();
+            return Ok("Category deleted successfully");
         }
     }
 }

@@ -6,7 +6,7 @@
         public string productDescription { get; set; } = string.Empty;
         public decimal price { get; set; }
         public int stockQuantity { get; set; }
-        public string imageUrl { get; set; } = string.Empty;
+        public IFormFile? image { get; set; } 
         public int categoryId { get; set; }
     }
 }
